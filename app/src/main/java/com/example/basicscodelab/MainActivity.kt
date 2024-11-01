@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +19,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,26 +41,34 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(
-    modifier: Modifier,
-    names: List<String> = listOf("World", "Compose")
-) {
-    Surface(
-        modifier = modifier,
-//        color = MaterialTheme.colorScheme.primary
-    ) {
-        Column(modifier) {
-            for (name in names) {
-                Greeting(name = name)
-            }
+fun MyApp(modifier: Modifier) {
+    var shouldShowOnboarding by remember { mutableStateOf(true) }
+
+    Surface(modifier = modifier) {
+        if (shouldShowOnboarding) {
+            OnboardingScreen(modifier, onContinueClicked = { shouldShowOnboarding = false })
+        } else {
+            Greetings(modifier)
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    val expanded = remember { mutableStateOf(false) }
-    val extraPadding = if (expanded.value) 48.dp else 0.dp
+fun Greetings(
+    modifier: Modifier,
+    names: List<String> = listOf("World", "Compose")
+) {
+    Column(modifier = modifier.padding(vertical = 4.dp)) {
+        for (name in names) {
+            Greeting(name = name)
+        }
+    }
+}
+
+@Composable
+fun Greeting(modifier: Modifier = Modifier, name: String) {
+    var expanded by remember { mutableStateOf(false) }
+    var extraPadding = if (expanded) 48.dp else 0.dp
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
@@ -75,10 +87,27 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 )
             }
             ElevatedButton(
-                onClick = { expanded.value = !expanded.value }
+                onClick = { expanded = !expanded }
             ) {
-                Text(if (expanded.value) "Show less" else "Show more")
+                Text(if (expanded) "Show less" else "Show more")
             }
+        }
+    }
+}
+
+@Composable
+fun OnboardingScreen(modifier: Modifier, onContinueClicked: () -> Unit) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Welcome to the Basics Codelab!")
+        Button(
+            modifier = Modifier.padding(vertical = 24.dp),
+            onClick = onContinueClicked
+        ) {
+            Text("Continue")
         }
     }
 }
@@ -87,6 +116,14 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     BasicsCodelabTheme {
-        Greeting("Android")
+        Greetings(modifier = Modifier)
+    }
+}
+
+@Preview
+@Composable
+fun OnBoardingScreenPreview() {
+    BasicsCodelabTheme {
+        OnboardingScreen(modifier = Modifier, onContinueClicked = {})
     }
 }
